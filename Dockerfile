@@ -1,97 +1,61 @@
-# We're using Alpine Edge
-FROM alpine:edge
+FROM kalilinux/kali-rolling
+RUN apt-get update && apt upgrade -y && apt-get install sudo -y
 
-#
-# We have to uncomment Community repo for some packages
-#
-RUN sed -e 's;^#http\(.*\)/edge/community;http\1/edge/community;g' -i /etc/apk/repositories
-
-#
-# Installing Packages
-#
-RUN apk add freetype-dev --no-cache=true --update \
+RUN apt-get install -y\
     coreutils \
     bash \
-    build-base \
-    bzip2-dev \
+    nodejs \
+    bzip2 \
     curl \
     figlet \
     gcc \
     g++ \
     git \
-    sudo \
     aria2 \
     util-linux \
-    libevent \
-    jpeg-dev \
+    libevent-dev \
+    libjpeg-dev \
     libffi-dev \
-    libpq \
+    libpq-dev \
     libwebp-dev \
     libxml2 \
     libxml2-dev \
     libxslt-dev \
-    linux-headers \
     musl \
     neofetch \
-    openssl-dev \
+    libcurl4-openssl-dev \
     postgresql \
     postgresql-client \
-    postgresql-dev \
+    postgresql-server-dev-all \
     openssl \
     pv \
     jq \
     wget \
-    w3m \
-    #python \
-    #python-dev \
     python3 \
     python3-dev \
-    readline-dev \
+    python3-pip \
+    libreadline-dev \
+    zipalign \
     sqlite \
     ffmpeg \
-    libjpeg-turbo-dev \
-    sqlite-dev \
-    libc-dev \
-    sudo \
-    chromium \
-    chromium-chromedriver \
-    zlib-dev \
-    jpeg 
-    
-     
-    #
+    libsqlite3-dev \
+    axel \
+    zlib1g-dev \
+    recoverjpeg \
+    zip \
+    megatools \
+    libfreetype6-dev \
+    procps \
+    policykit-1
 
-RUN curl https://cli-assets.heroku.com/install.sh
-
-
-RUN python3 -m ensurepip \
-    && pip3 install --upgrade pip setuptools \
-    && pip3 install wheel \
-    && rm -r /usr/lib/python*/ensurepip && \
-    if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \
-    if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
-    rm -r /root/.cache
-
-
-
-
-#
-# Clone repo and prepare working directory
-#
-RUN git clone -b sql-extended https://github.com/WolfGangIndia/WolfUserBot /root/wolfuserbot
-RUN mkdir /root/userbot/.bin
-WORKDIR /root/wolfuserbot/
-ENV PATH="/root/userbot/.bin:$PATH"
-WORKDIR /root/wolfuserbot/
-
-#
-# Copies session and config (if it exists)
-#
-COPY ./sample_config.env ./WolfUserBot.session* ./config.env* /root/wolfuserbot/
-
-#
-# Install requirements
-#
+RUN pip3 install --upgrade pip setuptools 
+RUN if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi 
+RUN if [ ! -e /usr/bin/python ]; then ln -sf /usr/bin/python3 /usr/bin/python; fi 
+RUN rm -r /root/.cache
+RUN aria2c https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && apt install -y ./google-chrome-stable_current_amd64.deb && rm -rf google-chrome-stable_current_amd64.deb
+RUN git clone -b kali https://github.com/WolfGangIndia/WolfUserBot /root/WolfUserBot
+RUN mkdir /root/userbot/bin/
+WORKDIR /root/userbot/
+RUN chmod +x /usr/local/bin/*
 RUN pip3 install -r requirements.txt
 CMD ["python3","-m","wolfuserbot"]
-
